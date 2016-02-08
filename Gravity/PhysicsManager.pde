@@ -1,30 +1,32 @@
+import java.util.*;
+
 class PhysicsManager
 {
 
-    private ArrayList<Planet> planets;
-    private ArrayList<Star> stars;
-    private ArrayList<Planet> cleanup;
+    private LinkedList<Planet> planets;
+    private LinkedList<Star> stars;
+    private LinkedList<Planet> cleanup;
 
     private float gconst;
 
     public PhysicsManager(float gconst)
     {
-        this.planets = new ArrayList();
-        this.stars = new ArrayList();
-        this.cleanup = new ArrayList();
+        this.planets = new LinkedList();
+        this.stars = new LinkedList();
+        this.cleanup = new LinkedList();
         this.gconst = gconst;
     }
 
     public void addPlanet(PVector position, PVector init_velocity)
     {
         Planet p = new Planet(position, init_velocity, 100, 2.5, #0022ff);
-        this.planets.add(p);
+        this.planets.addLast(p);
     }
 
     public void addStar(PVector position)
     {
         Star s = new Star(position, 10000, 20);
-        this.stars.add(s);
+        this.stars.addLast(s);
     }
 
     public void update()
@@ -115,7 +117,19 @@ class PhysicsManager
 
     public void reset()
     {
-        this.planets = new ArrayList();
-        this.stars = new ArrayList();
+        this.planets = new LinkedList();
+        this.stars = new LinkedList();
+    }
+
+    public void toggleTrails()
+    {
+        for(Planet p: planets)
+            p.toggleTrail();
+    }
+
+    public void toggleVectors()
+    {
+        for(Planet p: planets)
+            p.toggleVectors();
     }
 }

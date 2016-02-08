@@ -3,6 +3,9 @@ import processing.data.*;
 import processing.event.*; 
 import processing.opengl.*; 
 
+import java.util.*; 
+import java.util.*; 
+
 import java.util.HashMap; 
 import java.util.ArrayList; 
 import java.io.File; 
@@ -93,10 +96,11 @@ public void mouseClicked(MouseEvent event)
 
 public void keyPressed(KeyEvent event)
 {
-    if(event.getKey() == 'r')
-    {
-        pm.reset();
-    }
+    if(event.getKey() == 'r') pm.reset();
+    else if (event.getKey() == 'v') pm.toggleVectors();
+    else if (event.getKey() == 't') pm.toggleTrails();
+    else if (event.getKey() == 'q') exit();
+
 }
 abstract class MassObject
 {
@@ -141,33 +145,35 @@ abstract class MassObject
 
 
 }
+
+
 class PhysicsManager
 {
 
-    private ArrayList<Planet> planets;
-    private ArrayList<Star> stars;
-    private ArrayList<Planet> cleanup;
+    private LinkedList<Planet> planets;
+    private LinkedList<Star> stars;
+    private LinkedList<Planet> cleanup;
 
     private float gconst;
 
     public PhysicsManager(float gconst)
     {
-        this.planets = new ArrayList();
-        this.stars = new ArrayList();
-        this.cleanup = new ArrayList();
+        this.planets = new LinkedList();
+        this.stars = new LinkedList();
+        this.cleanup = new LinkedList();
         this.gconst = gconst;
     }
 
     public void addPlanet(PVector position, PVector init_velocity)
     {
         Planet p = new Planet(position, init_velocity, 100, 2.5f, 0xff0022ff);
-        this.planets.add(p);
+        this.planets.addLast(p);
     }
 
     public void addStar(PVector position)
     {
         Star s = new Star(position, 10000, 20);
-        this.stars.add(s);
+        this.stars.addLast(s);
     }
 
     public void update()
@@ -258,37 +264,111 @@ class PhysicsManager
 
     public void reset()
     {
-        this.planets = new ArrayList();
-        this.stars = new ArrayList();
+        this.planets = new LinkedList();
+        this.stars = new LinkedList();
+    }
+
+    public void toggleTrails()
+    {
+        for(Planet p: planets)
+            p.toggleTrail();
+    }
+
+    public void toggleVectors()
+    {
+        for(Planet p: planets)
+            p.toggleVectors();
     }
 }
+
+
 class Planet extends MassObject
 {
     private int c;
+    private LinkedList<PVector> history;
+    private int count;
+
+    private boolean showVectors;
+    private boolean showTrail;
 
     public Planet ( PVector position, PVector velocity, float mass, float radius, int c )
     {
         super(position, velocity, mass, radius);
         this.c = c;
+
+        this.history = new LinkedList();
+        this.count = 0;
+
+        this.showTrail = false;
+        this.showVectors = false;
+    }
+
+    @Override
+    public void update()
+    {
+        if(this.count == 5)
+        {
+            if(this.history.size() == 300/count)
+                this.history.removeFirst();
+
+            this.history.addLast(this.position);
+            count = 0;
+        }
+        else
+        {
+            this.count++;
+        }
+
+        super.update();
     }
 
     @Override
     public void draw()
     {
+        if(this.position.x > width || this.position.x < 0 || this.position.y > height || this.position.y < 0)
+            return;
+
+        //draw trail:
+        if (this.showTrail)
+        {
+            stroke(0xff00ffd9);
+            noFill();
+            beginShape();
+            for(PVector p: this.history)
+            {
+                curveVertex(p.x,p.y);
+            }
+            endShape();
+            noStroke();
+        }
+
         fill(this.c);
         ellipse(this.position.x, this.position.y, this.radius * 2.0f, this.radius * 2.0f);
 
-        //Debug forces:
-        PVector f = this.forces.copy();
-        f.mult(1f/this.mass);
-        f.add(this.position);
-        stroke(0xffffffff);
-        line(this.position.x, this.position.y, f.x, f.y);
+        if (this.showVectors)
+        {
+            //Debug forces:
+            PVector f = this.forces.copy();
+            f.mult(1f/this.mass);
+            f.add(this.position);
+            stroke(0xffffffff);
+            line(this.position.x, this.position.y, f.x, f.y);
 
-        f = PVector.add(this.position, this.velocity);
-        stroke(0xff99ff00);
-        line(this.position.x, this.position.y, f.x, f.y);
-        noStroke();
+            f = PVector.add(this.position, this.velocity);
+            stroke(0xff99ff00);
+            line(this.position.x, this.position.y, f.x, f.y);
+            noStroke();
+        }
+    }
+
+    public void toggleTrail()
+    {
+        this.showTrail = !this.showTrail;
+    }
+
+    public void toggleVectors()
+    {
+        this.showVectors = !this.showVectors;
     }
 }
 class Star extends MassObject

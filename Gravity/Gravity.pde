@@ -77,8 +77,9 @@ void mouseClicked(MouseEvent event)
 
 void keyPressed(KeyEvent event)
 {
-    if(event.getKey() == 'r')
-    {
-        pm.reset();
-    }
+    if(event.getKey() == 'r') pm.reset();
+    else if (event.getKey() == 'v') pm.toggleVectors();
+    else if (event.getKey() == 't') pm.toggleTrails();
+    else if (event.getKey() == 'q') exit();
+
 }
