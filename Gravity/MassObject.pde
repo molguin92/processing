@@ -1,57 +1,43 @@
-class MassObject
+abstract class MassObject
 {
-  
-  float x;
-  float y;
-  
-  float vx;
-  float vy;
-  
-  float mass;
-  float rad;
-  float fx; //force vector
-  float fy;
-  
-  float drag = 0;
-  
-  public MassObject(float x, float y, float rad, float mass)
-  {
-    this.x = x;
-    this.y = y;
-    this.mass = mass;
-    this.rad = rad;
-    
-    this.vx = 0;
-    this.vy = 0;
-  }
-  
-  void update()
-  {
-    this.x += vx;
-    this.y += vy;
-    
-    //acceleration
-    vx += fx/mass;
-    vy += fy/mass;
-    
-    //add some drag
-    if(fx > 0) fx -= drag;
-    else if (fx < 0) fx += drag;
-    
-    if(fy > 0) fy -= drag;
-    else if (fy < 0) fy += drag;
-  }
-  
-  void apply_force(float fx, float fy)
-  {
-    this.fx += fx;
-    this.fy += fy;
-  }
-  
-  void draw()
-  {
-    fill(#ff0000);
-    ellipse(x, y, rad, rad);
-  }
+
+    PVector position;
+    PVector velocity;
+    PVector forces;
+
+    float mass;
+    float radius;
+
+    MassObject(PVector position, PVector velocity, float mass, float radius)
+    {
+        this.position = position;
+        this.velocity = velocity;
+        this.forces = new PVector(0, 0);
+        this.mass = mass;
+        this.radius = radius;
+    }
+
+    void update()
+    {
+        this.velocity = PVector.add(this.velocity, PVector.div(this.forces, this.mass * frameRate)); // a = f/m * 1/60
+        this.position = PVector.add(this.position, PVector.mult(this.velocity, 1f/frameRate)); // (x', y') = (x, y) + (dx, dy) * 1/60
+        //System.out.println(this.velocity);
+        //System.out.println(this.position);
+    }
+
+    void applyForce(PVector force)
+    {
+        this.forces = PVector.add(this.forces, force);
+    }
+
+    void resetForces()
+    {
+        this.forces = new PVector(0,0);
+    }
+
+    abstract void draw();
+
+
+
+
 }
-  
