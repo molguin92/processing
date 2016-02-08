@@ -4,6 +4,8 @@ boolean drag;
 
 PhysicsManager pm;
 
+int a;
+
 void setup()
 {
   size(800, 600);
