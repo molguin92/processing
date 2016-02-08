@@ -4,8 +4,6 @@ boolean drag;
 
 PhysicsManager pm;
 
-int a;
-
 void setup()
 {
   size(800, 600);
@@ -28,6 +26,7 @@ void draw()
     fill(color(85, 210, 254));
     textSize(24);
     text("" + frameRate, 5, 25);
+    text("" + pm.getNumberOfPlanets(), 5, 50);
 
     pm.update();
     pm.draw();
@@ -65,5 +64,21 @@ void mouseReleased()
         drag = false;
         prev_x = 0;
         prev_y = 0;
+    }
+}
+
+void mouseClicked(MouseEvent event)
+{
+    if(event.getButton() == RIGHT)
+    {
+        pm.addStar(new PVector(mouseX, mouseY));
+    }
+}
+
+void keyPressed(KeyEvent event)
+{
+    if(event.getKey() == 'r')
+    {
+        pm.reset();
     }
 }

@@ -53,6 +53,26 @@ class PhysicsManager
                 this.checkCollision(s, p);
             }
 
+            for(Planet s: planets)
+            {
+                if(p.equals(s)) continue;
+
+                // F = (m1*m2/d^2) * K
+                mm = p.mass * s.mass;
+                dist = PVector.dist(p.position, s.position);
+
+                if(dist != 0)
+                {
+                    force = PVector.sub(s.position, p.position).normalize();
+                    force = PVector.mult(force, mm * this.gconst / (dist * dist));
+                }
+                else
+                {
+                    force = new PVector(0,0);
+                }
+                p.applyForce(force);
+            }
+
             p.update();
         }
 
@@ -88,4 +108,14 @@ class PhysicsManager
 
     }
 
+    public int getNumberOfPlanets()
+    {
+        return this.planets.size();
+    }
+
+    public void reset()
+    {
+        this.planets = new ArrayList();
+        this.stars = new ArrayList();
+    }
 }

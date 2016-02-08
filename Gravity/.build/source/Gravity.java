@@ -42,6 +42,7 @@ public void draw()
     fill(color(85, 210, 254));
     textSize(24);
     text("" + frameRate, 5, 25);
+    text("" + pm.getNumberOfPlanets(), 5, 50);
 
     pm.update();
     pm.draw();
@@ -79,6 +80,22 @@ public void mouseReleased()
         drag = false;
         prev_x = 0;
         prev_y = 0;
+    }
+}
+
+public void mouseClicked(MouseEvent event)
+{
+    if(event.getButton() == RIGHT)
+    {
+        pm.addStar(new PVector(mouseX, mouseY));
+    }
+}
+
+public void keyPressed(KeyEvent event)
+{
+    if(event.getKey() == 'r')
+    {
+        pm.reset();
     }
 }
 abstract class MassObject
@@ -179,6 +196,26 @@ class PhysicsManager
                 this.checkCollision(s, p);
             }
 
+            for(Planet s: planets)
+            {
+                if(p.equals(s)) continue;
+
+                // F = (m1*m2/d^2) * K
+                mm = p.mass * s.mass;
+                dist = PVector.dist(p.position, s.position);
+
+                if(dist != 0)
+                {
+                    force = PVector.sub(s.position, p.position).normalize();
+                    force = PVector.mult(force, mm * this.gconst / (dist * dist));
+                }
+                else
+                {
+                    force = new PVector(0,0);
+                }
+                p.applyForce(force);
+            }
+
             p.update();
         }
 
@@ -214,6 +251,16 @@ class PhysicsManager
 
     }
 
+    public int getNumberOfPlanets()
+    {
+        return this.planets.size();
+    }
+
+    public void reset()
+    {
+        this.planets = new ArrayList();
+        this.stars = new ArrayList();
+    }
 }
 class Planet extends MassObject
 {
@@ -231,8 +278,9 @@ class Planet extends MassObject
         fill(this.c);
         ellipse(this.position.x, this.position.y, this.radius * 2.0f, this.radius * 2.0f);
 
+        //Debug forces:
         PVector f = this.forces.copy();
-        f.mult(0.1f);
+        f.mult(1f/this.mass);
         f.add(this.position);
         stroke(0xffffffff);
         line(this.position.x, this.position.y, f.x, f.y);
@@ -240,6 +288,7 @@ class Planet extends MassObject
         f = PVector.add(this.position, this.velocity);
         stroke(0xff99ff00);
         line(this.position.x, this.position.y, f.x, f.y);
+        noStroke();
     }
 }
 class Star extends MassObject

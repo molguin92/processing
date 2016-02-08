@@ -14,8 +14,9 @@ class Planet extends MassObject
         fill(this.c);
         ellipse(this.position.x, this.position.y, this.radius * 2.0, this.radius * 2.0);
 
+        //Debug forces:
         PVector f = this.forces.copy();
-        f.mult(0.1);
+        f.mult(1f/this.mass);
         f.add(this.position);
         stroke(#ffffff);
         line(this.position.x, this.position.y, f.x, f.y);
@@ -23,5 +24,6 @@ class Planet extends MassObject
         f = PVector.add(this.position, this.velocity);
         stroke(#99ff00);
         line(this.position.x, this.position.y, f.x, f.y);
+        noStroke();
     }
 }
