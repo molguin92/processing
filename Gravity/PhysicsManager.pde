@@ -8,6 +8,8 @@ class PhysicsManager
     private LinkedList<Planet> cleanup;
 
     private float gconst;
+    private boolean showVectors;
+    private boolean showTrails;
 
     public PhysicsManager(float gconst)
     {
@@ -15,11 +17,14 @@ class PhysicsManager
         this.stars = new LinkedList();
         this.cleanup = new LinkedList();
         this.gconst = gconst;
+
+        this.showVectors = false;
+        this.showTrails = false;
     }
 
     public void addPlanet(PVector position, PVector init_velocity)
     {
-        Planet p = new Planet(position, init_velocity, 100, 2.5, #0022ff);
+        Planet p = new Planet(position, init_velocity, 100, 2.5, #0022ff, this.showVectors, this.showTrails);
         this.planets.addLast(p);
     }
 
@@ -123,13 +128,17 @@ class PhysicsManager
 
     public void toggleTrails()
     {
+        this.showTrails = !this.showTrails;
+
         for(Planet p: planets)
-            p.toggleTrail();
+            p.showTrail = this.showTrails;
     }
 
     public void toggleVectors()
     {
+        this.showVectors = !this.showVectors;
+
         for(Planet p: planets)
-            p.toggleVectors();
+            p.showVectors = this.showVectors;
     }
 }

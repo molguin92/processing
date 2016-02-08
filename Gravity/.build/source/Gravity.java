@@ -155,6 +155,8 @@ class PhysicsManager
     private LinkedList<Planet> cleanup;
 
     private float gconst;
+    private boolean showVectors;
+    private boolean showTrails;
 
     public PhysicsManager(float gconst)
     {
@@ -162,11 +164,14 @@ class PhysicsManager
         this.stars = new LinkedList();
         this.cleanup = new LinkedList();
         this.gconst = gconst;
+
+        this.showVectors = false;
+        this.showTrails = false;
     }
 
     public void addPlanet(PVector position, PVector init_velocity)
     {
-        Planet p = new Planet(position, init_velocity, 100, 2.5f, 0xff0022ff);
+        Planet p = new Planet(position, init_velocity, 100, 2.5f, 0xff0022ff, this.showVectors, this.showTrails);
         this.planets.addLast(p);
     }
 
@@ -270,14 +275,18 @@ class PhysicsManager
 
     public void toggleTrails()
     {
+        this.showTrails = !this.showTrails;
+
         for(Planet p: planets)
-            p.toggleTrail();
+            p.showTrail = this.showTrails;
     }
 
     public void toggleVectors()
     {
+        this.showVectors = !this.showVectors;
+
         for(Planet p: planets)
-            p.toggleVectors();
+            p.showVectors = this.showVectors;
     }
 }
 
@@ -288,10 +297,10 @@ class Planet extends MassObject
     private LinkedList<PVector> history;
     private int count;
 
-    private boolean showVectors;
-    private boolean showTrail;
+    public boolean showVectors;
+    public boolean showTrail;
 
-    public Planet ( PVector position, PVector velocity, float mass, float radius, int c )
+    public Planet ( PVector position, PVector velocity, float mass, float radius, int c, boolean showVectors, boolean showTrail )
     {
         super(position, velocity, mass, radius);
         this.c = c;
@@ -299,8 +308,8 @@ class Planet extends MassObject
         this.history = new LinkedList();
         this.count = 0;
 
-        this.showTrail = false;
-        this.showVectors = false;
+        this.showTrail = showTrail;
+        this.showVectors = showVectors;
     }
 
     @Override
@@ -359,16 +368,6 @@ class Planet extends MassObject
             line(this.position.x, this.position.y, f.x, f.y);
             noStroke();
         }
-    }
-
-    public void toggleTrail()
-    {
-        this.showTrail = !this.showTrail;
-    }
-
-    public void toggleVectors()
-    {
-        this.showVectors = !this.showVectors;
     }
 }
 class Star extends MassObject

@@ -6,10 +6,10 @@ class Planet extends MassObject
     private LinkedList<PVector> history;
     private int count;
 
-    private boolean showVectors;
-    private boolean showTrail;
+    public boolean showVectors;
+    public boolean showTrail;
 
-    public Planet ( PVector position, PVector velocity, float mass, float radius, color c )
+    public Planet ( PVector position, PVector velocity, float mass, float radius, color c, boolean showVectors, boolean showTrail )
     {
         super(position, velocity, mass, radius);
         this.c = c;
@@ -17,8 +17,8 @@ class Planet extends MassObject
         this.history = new LinkedList();
         this.count = 0;
 
-        this.showTrail = false;
-        this.showVectors = false;
+        this.showTrail = showTrail;
+        this.showVectors = showVectors;
     }
 
     @Override
@@ -77,15 +77,5 @@ class Planet extends MassObject
             line(this.position.x, this.position.y, f.x, f.y);
             noStroke();
         }
-    }
-
-    public void toggleTrail()
-    {
-        this.showTrail = !this.showTrail;
-    }
-
-    public void toggleVectors()
-    {
-        this.showVectors = !this.showVectors;
     }
 }
