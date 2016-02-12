@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 class PhysicsManager
 {
@@ -11,6 +12,8 @@ class PhysicsManager
     private boolean showVectors;
     private boolean showTrails;
 
+    public ReentrantLock lock;
+
     public PhysicsManager(float gconst)
     {
         this.planets = new LinkedList();
@@ -20,88 +23,125 @@ class PhysicsManager
 
         this.showVectors = false;
         this.showTrails = false;
+
+        this.lock = new ReentrantLock();
     }
 
     public void addPlanet(PVector position, PVector init_velocity)
     {
-        Planet p = new Planet(position, init_velocity, 100, 2.5, #0022ff, this.showVectors, this.showTrails);
-        this.planets.addLast(p);
+        this.lock.lock();
+        try{
+            Planet p = new Planet(position, init_velocity, 100, 2.5, #0022ff, this.showVectors, this.showTrails);
+            this.planets.addLast(p);
+        }
+        finally
+        {
+            this.lock.unlock();
+        }
     }
 
     public void addStar(PVector position)
     {
-        Star s = new Star(position, 10000, 20);
-        this.stars.addLast(s);
+        this.lock.lock();
+        try{
+            Star s = new Star(position, 10000, 20);
+            this.stars.addLast(s);
+        }
+        finally
+        {
+            this.lock.unlock();
+        }
     }
 
-    public void update()
+    public void update(float deltaT)
     {
-        PVector force;
-        float mm;
-        float dist;
-        for(Planet p: planets)
-        {
-            for(Star s: stars)
-            {
-                // F = (m1*m2/d^2) * K
-                mm = p.mass * s.mass;
-                dist = PVector.dist(p.position, s.position);
+        //lock
+        this.lock.lock();
 
-                if(dist != 0)
+        try
+        {
+            PVector force;
+            float mm;
+            float dist;
+            for(Planet p: planets)
+            {
+                for(Star s: stars)
                 {
-                    force = PVector.sub(s.position, p.position).normalize();
-                    force = PVector.mult(force, mm * this.gconst / (dist * dist));
+                    // F = (m1*m2/d^2) * K
+                    mm = p.mass * s.mass;
+                    dist = PVector.dist(p.position, s.position);
+
+                    if(dist != 0)
+                    {
+                        force = PVector.sub(s.position, p.position).normalize();
+                        force = PVector.mult(force, mm * this.gconst / (dist * dist));
+                    }
+                    else
+                    {
+                        force = new PVector(0,0);
+                    }
+                    p.applyForce(force);
+                    this.checkCollision(s, p);
                 }
-                else
+
+                for(Planet s: planets)
                 {
-                    force = new PVector(0,0);
+                    if(p.equals(s)) continue;
+
+                    // F = (m1*m2/d^2) * K
+                    mm = p.mass * s.mass;
+                    dist = PVector.dist(p.position, s.position);
+
+                    if(dist != 0)
+                    {
+                        force = PVector.sub(s.position, p.position).normalize();
+                        force = PVector.mult(force, mm * this.gconst / (dist * dist));
+                    }
+                    else
+                    {
+                        force = new PVector(0,0);
+                    }
+                    p.applyForce(force);
                 }
-                p.applyForce(force);
-                this.checkCollision(s, p);
+
+                p.update(deltaT);
+                p.resetForces();
             }
 
-            for(Planet s: planets)
+            for(Planet p: cleanup)
             {
-                if(p.equals(s)) continue;
-
-                // F = (m1*m2/d^2) * K
-                mm = p.mass * s.mass;
-                dist = PVector.dist(p.position, s.position);
-
-                if(dist != 0)
-                {
-                    force = PVector.sub(s.position, p.position).normalize();
-                    force = PVector.mult(force, mm * this.gconst / (dist * dist));
-                }
-                else
-                {
-                    force = new PVector(0,0);
-                }
-                p.applyForce(force);
+                planets.remove(p);
             }
 
-            p.update();
+            cleanup.clear();
         }
 
-        for(Planet p: cleanup)
+        finally
         {
-            planets.remove(p);
+            this.lock.unlock();
         }
-
-        cleanup.clear();
     }
 
     public void draw()
     {
-        for(Star s: stars)
+        this.lock.lock();
+        try
         {
-            s.draw();
+            for(Star s: stars)
+            {
+                s.draw();
+            }
+
+            for(Planet p: planets)
+            {
+                p.draw();
+                //p.resetForces();
+            }
         }
 
-        for(Planet p: planets)
+        finally
         {
-            p.draw();
-            p.resetForces();
+            this.lock.unlock();
         }
     }
 
@@ -117,28 +157,60 @@ class PhysicsManager
 
     public int getNumberOfPlanets()
     {
-        return this.planets.size();
+        this.lock.lock();
+        try
+        {
+            return this.planets.size();
+        }
+        finally
+        {
+            this.lock.unlock();
+        }
     }
 
     public void reset()
     {
-        this.planets = new LinkedList();
-        this.stars = new LinkedList();
+        this.lock.lock();
+        try
+        {
+            this.planets = new LinkedList();
+            this.stars = new LinkedList();
+        }
+        finally
+        {
+            this.lock.unlock();
+        }
     }
 
     public void toggleTrails()
     {
-        this.showTrails = !this.showTrails;
+        this.lock.lock();
+        try
+        {
+            this.showTrails = !this.showTrails;
 
-        for(Planet p: planets)
-            p.showTrail = this.showTrails;
+            for(Planet p: planets)
+                p.showTrail = this.showTrails;
+        }
+        finally
+        {
+            this.lock.unlock();
+        }
     }
 
     public void toggleVectors()
     {
-        this.showVectors = !this.showVectors;
+        this.lock.lock();
+        try
+        {
+            this.showVectors = !this.showVectors;
 
-        for(Planet p: planets)
-            p.showVectors = this.showVectors;
+            for(Planet p: planets)
+                p.showVectors = this.showVectors;
+        }
+        finally
+        {
+            this.lock.unlock();
+        }
     }
 }

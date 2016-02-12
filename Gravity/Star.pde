@@ -9,7 +9,7 @@ class Star extends MassObject
     }
 
     @Override
-    public void update()
+    public void update(float deltaT)
     {}
 
     @Override

@@ -22,11 +22,11 @@ class Planet extends MassObject
     }
 
     @Override
-    public void update()
+    public void update(float deltaT)
     {
         if(this.count == 5)
         {
-            if(this.history.size() == 300/count)
+            if(this.history.size() >= 300/count)
                 this.history.removeFirst();
 
             this.history.addLast(this.position);
@@ -37,14 +37,14 @@ class Planet extends MassObject
             this.count++;
         }
 
-        super.update();
+        super.update(deltaT);
     }
 
     @Override
     public void draw()
     {
-        if(this.position.x > width || this.position.x < 0 || this.position.y > height || this.position.y < 0)
-            return;
+        // if(this.position.x > width || this.position.x < 0 || this.position.y > height || this.position.y < 0)
+        //     return;
 
         //draw trail:
         if (this.showTrail)
